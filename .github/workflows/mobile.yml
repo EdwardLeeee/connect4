@@ -75,7 +75,7 @@ jobs:
       # The unsigned release bundle proves the release build type still compiles.
       - run: ./gradlew assembleDebug bundleRelease
         working-directory: mobile/android
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v6
         with:
           name: connect4-debug-apk
           path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
@@ -157,7 +157,7 @@ jobs:
           sleep 3
           xcrun simctl io "${udid}" screenshot screenshots/home.png
       - if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: ios-simulator-screenshots
           path: screenshots/
@@ -214,7 +214,7 @@ jobs:
           { echo "### Android smoke"; grep -hE "^SMOKE |::error::" android-smoke/smoke.log 2>/dev/null \
               | sed 's/^/- /'; } >> "${GITHUB_STEP_SUMMARY}" || true
       - if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: android-smoke-screenshots
           path: android-smoke/
