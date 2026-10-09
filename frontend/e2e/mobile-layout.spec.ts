@@ -649,10 +649,7 @@ test("the app shows the privacy policy and its version in the profile sheet", as
       () => (window as typeof window & { __opened?: unknown[][] }).__opened,
     ),
   ).toEqual([
-    [
-      "https://github.com/EdwardLeeee/connect4/blob/main/PRIVACY.md",
-      "_blank",
-    ],
+    ["https://github.com/EdwardLeeee/connect4/blob/main/PRIVACY.md", "_blank"],
   ]);
 });
 
