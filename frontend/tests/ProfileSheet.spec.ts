@@ -22,7 +22,7 @@ vi.mock("../src/native", () => ({
 }));
 
 const PRIVACY_URL =
-  "https://github.com/EdwardLeeee/connect4-web2/blob/main/PRIVACY.md";
+  "https://github.com/EdwardLeeee/connect4/blob/main/PRIVACY.md";
 const version = (
   JSON.parse(readFileSync(join(__dirname, "../package.json"), "utf8")) as {
     version: string;

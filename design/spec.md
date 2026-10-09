@@ -175,7 +175,7 @@
   - 手機（瀏覽器與 app）是底部 sheet（L10）。
 - **內容**：「隱私權政策 · 版本 x.y.z」／「Privacy Policy · Version x.y.z」。
   - 網站顯示網站的版本（與 `/health` 回報的版本一致）；app 顯示 app 自身的版本。
-  - 「隱私權政策」是連結，指向 `https://github.com/EdwardLeeee/connect4-web2/blob/main/PRIVACY.md`（repo 是公開的）。
+  - 「隱私權政策」是連結，指向 `https://github.com/EdwardLeeee/connect4/blob/main/PRIVACY.md`（repo 是公開的）。
   - 網站在新分頁打開；app 用系統瀏覽器打開。
 - **樣式**：
   - 13px、`--muted` 灰。

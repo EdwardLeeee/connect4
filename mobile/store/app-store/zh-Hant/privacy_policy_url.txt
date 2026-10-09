@@ -1,1 +1,1 @@
-https://github.com/EdwardLeeee/connect4-web2/blob/main/PRIVACY.md
+https://github.com/EdwardLeeee/connect4/blob/main/PRIVACY.md
