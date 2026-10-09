@@ -10,7 +10,7 @@ const emit = defineEmits<{ close: [] }>();
 // The privacy policy and the version at the foot of the sheet, on the
 // website and in the app alike (spec: 隱私權政策小字).
 const PRIVACY_URL =
-  "https://github.com/EdwardLeeee/connect4-web2/blob/main/PRIVACY.md";
+  "https://github.com/EdwardLeeee/connect4/blob/main/PRIVACY.md";
 const APP_VERSION = __APP_VERSION__;
 
 function openPrivacy(event: MouseEvent) {

@@ -528,7 +528,7 @@ test("profile fields match and explain a rejected nickname", async ({
   await expect(privacy.locator("a")).toHaveAttribute("target", "_blank");
   await expect(privacy.locator("a")).toHaveAttribute(
     "href",
-    "https://github.com/EdwardLeeee/connect4-web2/blob/main/PRIVACY.md",
+    "https://github.com/EdwardLeeee/connect4/blob/main/PRIVACY.md",
   );
   await expect(privacy).toContainText(/版本 \d+\.\d+\.\d+/);
   const privacyBox = await privacy.evaluate((line) => {
@@ -650,7 +650,7 @@ test("the app shows the privacy policy and its version in the profile sheet", as
     ),
   ).toEqual([
     [
-      "https://github.com/EdwardLeeee/connect4-web2/blob/main/PRIVACY.md",
+      "https://github.com/EdwardLeeee/connect4/blob/main/PRIVACY.md",
       "_blank",
     ],
   ]);

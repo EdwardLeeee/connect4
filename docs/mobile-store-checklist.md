@@ -14,8 +14,8 @@ App Store 與 Google Play 後台要填的內容。第一次送審是 3.3.0（中
 | Bundle ID／Package | `com.oraclelee.connect4` |
 | 版本 | 3.3.0。App Store 版本頁預設的「1.0」要改成 3.3.0，才選得到上傳的建置 |
 | 類別 | 遊戲 → 棋盤遊戲（Board） |
-| 隱私權政策網址 | https://github.com/EdwardLeeee/connect4-web2/blob/main/PRIVACY.md |
-| 支援網址（App Store 必填） | https://github.com/EdwardLeeee/connect4-web2/issues |
+| 隱私權政策網址 | https://github.com/EdwardLeeee/connect4/blob/main/PRIVACY.md |
+| 支援網址（App Store 必填） | https://github.com/EdwardLeeee/connect4/issues |
 | 需要登入 | 否，沒有帳號 |
 | 廣告／App 內購買 | 無 |
 | 價格 | 免費 |

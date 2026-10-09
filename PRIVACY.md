@@ -20,7 +20,7 @@ Applies to the Four In A Row app (四子棋) and https://connect4.oraclelee.com.
   Cloudflare 依它自己的[隱私權政策](https://www.cloudflare.com/privacypolicy/)處理。
 - 刪除：清除瀏覽器裡這個網站的資料，就會刪除網站記住的連線代碼、暱稱與語言；刪掉 app 就會清掉手機上的
   連線代碼、暱稱、語言與 AI 對局進度；伺服器上的遊戲資料在重啟時清除。
-- 聯絡：請到本專案的 [GitHub Issues](https://github.com/EdwardLeeee/connect4-web2/issues) 留言。
+- 聯絡：請到本專案的 [GitHub Issues](https://github.com/EdwardLeeee/connect4/issues) 留言。
 
 ## English
 
@@ -44,7 +44,7 @@ Applies to the Four In A Row app (四子棋) and https://connect4.oraclelee.com.
   and language the website remembers; deleting the app removes the connection code, nickname,
   language and AI game progress from your phone; game data on the server is erased when it restarts.
 - Contact: open an issue on this project's
-  [GitHub Issues](https://github.com/EdwardLeeee/connect4-web2/issues).
+  [GitHub Issues](https://github.com/EdwardLeeee/connect4/issues).
 
 ## ภาษาไทย
 
@@ -64,4 +64,4 @@ Applies to the Four In A Row app (四子棋) and https://connect4.oraclelee.com.
 - การลบข้อมูล: การล้างข้อมูลของเว็บไซต์นี้ในเบราว์เซอร์จะลบรหัสการเชื่อมต่อ ชื่อเล่น และภาษาที่เว็บไซต์จดจำไว้
   การลบแอปจะลบรหัสการเชื่อมต่อ ชื่อเล่น ภาษา และความคืบหน้าของเกม AI ออกจากโทรศัพท์ของคุณ
   ส่วนข้อมูลเกมบนเซิร์ฟเวอร์จะถูกลบเมื่อเซิร์ฟเวอร์รีสตาร์ต
-- ติดต่อ: แจ้งเรื่องได้ที่ [GitHub Issues](https://github.com/EdwardLeeee/connect4-web2/issues) ของโปรเจกต์นี้
+- ติดต่อ: แจ้งเรื่องได้ที่ [GitHub Issues](https://github.com/EdwardLeeee/connect4/issues) ของโปรเจกต์นี้

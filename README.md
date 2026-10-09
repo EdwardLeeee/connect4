@@ -1,193 +1,144 @@
-# Connect 4
+<p align="center">
+  <img src="mobile/store/play-icon-512.png" alt="Four In A Row app icon" width="112">
+</p>
 
-一個伺服器權威的即時四子棋：支援 Super AI（精確求解器）、私人房與隨機配對，介面提供繁體中文／英文，並針對現代 iPhone 與 Samsung Galaxy 版面驗證。
+<h1 align="center">Four In A Row: Super AI</h1>
 
-## 技術架構
+<p align="center">
+  Four-in-a-row against an AI that never makes a mistake, or against your friends online.<br>
+  On the web and on iPhone, in English, 繁體中文 and ไทย.
+</p>
 
-- `backend/connect4_app/`：FastAPI、原生 WebSocket、匿名 Cookie 工作階段與房間狀態。
-- `native_solver/`：PyO3 擴充，封裝 `connect-four-ai` 1.0.0 精確求解器。
-- `frontend/`：Vue 3、TypeScript、Pinia、Vue I18n 與響應式棋盤；介面規格見 `design/spec.md`。
-- `Containerfile`、`deploy/`：Podman 正式映像、環境設定範例與 systemd user service。
+<p align="center">
+  <a href="https://connect4.oraclelee.com"><img alt="Play in the browser" src="https://img.shields.io/badge/Play-in%20the%20browser-2e7d32?style=for-the-badge"></a>
+  <a href="https://apps.apple.com/app/id6816204087"><img alt="Download on the App Store" src="https://img.shields.io/badge/App%20Store-Download-0a84ff?style=for-the-badge&logo=apple&logoColor=white"></a>
+  <a href="LICENSE"><img alt="License: PolyForm Noncommercial 1.0.0" src="https://img.shields.io/badge/license-PolyForm%20Noncommercial-555?style=for-the-badge"></a>
+</p>
 
-AI 會算出每個合法落子的精確終局分數，再選擇最高分手；同分時固定採中央優先。沒有深度限制、隨機弱化或啟發式備援。原生引擎若故障，該局會停止並回報錯誤。
+<p align="center"><a href="#繁體中文">繁體中文說明在下方</a></p>
 
-## 本機開發
+## Demo
 
-需要 Python 3.10+、stable Rust、Node.js 22+：
+- **Play now in any browser:** <https://connect4.oraclelee.com>. No sign-up; open the page and play.
+- **iPhone:** [Four In A Row: Super AI on the App Store](https://apps.apple.com/app/id6816204087) (iOS 15 or later, free, no ads).
+
+<p align="center">
+  <img src="docs/media/demo.gif" alt="A full game against the Super AI in the iPhone app" width="280">
+</p>
+
+<p align="center">
+  <img src="docs/media/screenshot-beat-ai.jpg" alt="Beating the Super AI" width="200">
+  <img src="docs/media/screenshot-invite.jpg" alt="Inviting a friend to a private room" width="200">
+  <img src="docs/media/screenshot-matching.jpg" alt="Finding an online opponent" width="200">
+  <img src="docs/media/screenshot-lobby.jpg" alt="The lobby" width="200">
+</p>
+
+## Features
+
+- **A Super AI that plays perfectly.** An exact solver scores every legal move to the end of the game and picks the best one, with a fixed centre-first tie-break. It has no depth limit, no random weakening and no heuristic fallback. A precomputed reply table answers the slowest positions instantly.
+- **Play with friends.** Create a private room and share the room code, invite link or QR code. Friends can join from the app or any browser.
+- **Quick match** pairs you with another player online.
+- **The iPhone app works offline.** The same solver runs on the phone as WebAssembly, so AI games need no network, and an unfinished game resumes after the app is closed.
+- **Three languages.** English, Traditional Chinese and Thai; the first launch follows the device language.
+- **No account, no ads, no tracking.** See the [privacy policy](PRIVACY.md).
+
+## How it works
+
+```mermaid
+flowchart LR
+    web["Browser<br>(Vue 3 web app)"] -- "HTTPS / WebSocket<br>cookie session" --> edge["Cloudflare + nginx"]
+    ios["iPhone app<br>(same Vue UI in Capacitor)"] -- "HTTPS / WebSocket<br>session token" --> edge
+    edge --> api["FastAPI server<br>rooms, matchmaking, sessions"]
+    api --> solver["Exact solver<br>Rust via PyO3 + reply table"]
+    ios --> wasm["On-device AI<br>WebAssembly in a Web Worker"]
+```
+
+- The server is authoritative for every online game: it checks each move and decides the result, so clients cannot cheat.
+- The website and the app share one Vue code base. The app packages it with Capacitor and adds offline AI, saved progress and the system share sheet.
+- Sessions and rooms live in the server's memory; there is no database. The wire protocol is documented in [docs/protocol.md](docs/protocol.md).
+
+| Part | Technology |
+| --- | --- |
+| Frontend | Vue 3, TypeScript, Pinia, Vue I18n, Vite |
+| Backend | Python 3.10+, FastAPI, Uvicorn, native WebSocket |
+| AI | [connect-four-ai](https://github.com/benjaminrall/connect-four-ai) (Rust) through PyO3 on the server and as WebAssembly in the app |
+| Mobile | Capacitor 8 (iOS; an Android build is produced in CI) |
+| Delivery | Podman image on GHCR, systemd, nginx, Cloudflare |
+
+## Quality checks
+
+Every pull request runs on GitHub Actions and must pass before it can be merged:
+
+- **backend:** Ruff lint and format, pytest, the Rust solver's tests, dependency audits (pip-audit, cargo audit), shellcheck and a dry run of the release script.
+- **frontend:** Vitest unit tests, type-checked build, Prettier and about 60 Playwright scenarios on 10 screen sizes (six iPhones in WebKit, a Galaxy S26 Ultra in portrait and landscape, two desktops), with screenshot comparison against approved baselines.
+- **container:** builds the production image, starts it and plays an AI move against it.
+- **Mobile** (when app files change): iPhone simulator and Android emulator smoke tests, including offline play and first launch in each language.
+
+## Run it locally
+
+You need Python 3.10+, stable Rust and Node.js 22+.
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -e '.[dev]'
 npm --prefix frontend install
-```
 
-分別啟動 API 與 Vite：
-
-```bash
 .venv/bin/uvicorn connect4_app.app:app --host 127.0.0.1 --port 55555 --reload
-npm --prefix frontend run dev
+npm --prefix frontend run dev        # then open http://127.0.0.1:5173
 ```
 
-開啟 `http://127.0.0.1:5173`。正式執行時先跑 `npm --prefix frontend run build`，再以單一 Uvicorn worker 啟動；房間狀態目前存於記憶體，不可使用多 worker。
+More detail (in Traditional Chinese):
 
-### 改動流程
+- [docs/development.md](docs/development.md): development workflow, tests and the mobile app
+- [docs/deploy.md](docs/deploy.md): releases and production deployment
+- [docs/mobile-release.md](docs/mobile-release.md): building, signing and publishing the app
 
-`main` 受保護，不接受直接 push。每個改動走分支與 pull request，CI 的 `backend`、
-`frontend`、`container` 三個檢查都綠才能合併（squash）。多個 session 同時開發時，各自用
-獨立的 worktree，不要在共用的 checkout 切分支：
+## License
 
-```bash
-scripts/dev-worktree.sh front feat/win-animation   # 建 ../connect4-web2-worktrees/front
-```
+Copyright (c) 2024-2026 EdwardLeeee.
 
-Dependabot 每週檢查 npm、pip、cargo 與 GitHub Actions 的更新；小版本與修補版在 CI 綠燈後
-自動合併，大版本等人審。
+This project is **source-available, not open source**. It is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE):
 
-## 驗證
+- **Allowed:** reading the code, learning from it, running it and changing it for personal, educational, research or other noncommercial purposes.
+- **Not allowed without permission:** any commercial use, such as selling it, publishing it as your own app, running it with ads or using it in a company's product or service.
 
-```bash
-.venv/bin/pytest
-.venv/bin/ruff check backend tests
-npm --prefix frontend test
-npm --prefix frontend run build
-```
+For a commercial license, open an issue on this repository.
 
-手機矩陣測試涵蓋 390×844 至 440×956 的 iPhone 14 Pro Max～17 系列，以及 Galaxy S26 Ultra 直向／橫向：
+Third-party components keep their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-```bash
-cd frontend
-npx playwright install --with-deps chromium webkit
-npm run test:e2e
-```
+Connect 4 is a trademark of Hasbro. This project is an independent implementation of the traditional four-in-a-row game and is not affiliated with or endorsed by Hasbro.
 
-測試會檢查水平溢位、44px 觸控目標、鍵盤高度與視覺基準。
+---
 
-視覺基準圖由 CI 的 Ubuntu 22.04 產生，字型與瀏覽器和 CI 的 `frontend` 檢查相同。改了畫面之後，到 GitHub Actions
-手動執行 `Update screenshots` 並填入分支名稱（可選填 `grep` 只跑部分測試）。它只重寫對不上或缺少的基準圖，
-commit 回那個分支，再在分支上啟動 CI。
+## 繁體中文
 
-## 行動版 app
+**四子棋 Super AI**：跟一個永遠不會下錯的 AI 對戰，或在線上跟朋友對戰。網頁和 iPhone app 都能玩，支援繁體中文、英文和泰文。
 
-iOS／Android app「四子棋」（英文 Four In A Row，bundle ID `com.oraclelee.connect4`）放在
-`mobile/`：Capacitor 把 `frontend/` 的建置結果打包進 app，app 再以 session token 跨網域連
-`https://connect4.oraclelee.com`（協定見 `docs/protocol.md` 的「App 連線」）。改網頁後要發新版
-app 才會帶上，網站本身的發版流程不變。
+### 馬上試玩
 
-- 改到 app 會打包的檔案時，pull request 會跑 `Mobile` workflow：建置 Android debug APK
-  （artifact `connect4-debug-apk`，可直接側載）與 iOS 模擬器版。它不是必要檢查。
-- 發布：網頁版本上線後，從 main 手動執行 Actions 的 `Mobile release` 並填入該版本的 `v*` tag，
-  產生簽章的 Android AAB 並把 iOS 版上傳到 TestFlight；缺哪個平台的簽章 secrets 就跳過哪個，並寫出原因。
-- Android 上傳金鑰只存在 GitHub secrets 與 `~/.config/connect4-mobile/`，務必另外備份到密碼管理器。
-  iOS 簽章要等有 Apple Developer 會員後才啟用。
-- 隱私權政策：[PRIVACY.md](PRIVACY.md)。
+- **瀏覽器**：<https://connect4.oraclelee.com>，不用註冊，打開就能玩。
+- **iPhone**：[App Store 上的「四子棋 Super AI」](https://apps.apple.com/app/id6816204087)，需要 iOS 15 以上，免費、沒有廣告。
 
-建置、簽章、iOS 啟用步驟與上架準備見 `docs/mobile-release.md` 和 `docs/mobile-store-checklist.md`。
+### 特色
 
-## 設定與部署
+- **Super AI 下出完美的棋**：每一步都算到終局，選最好的一手；沒有深度限制，不會故意放水。最花時間的局面事先算好存成回應表，所以回得很快。
+- **跟朋友玩**：建立私人房間，分享房號、邀請連結或 QR code；朋友用 app 或任何瀏覽器都能加入。
+- **隨機配對**：跟線上的其他玩家對戰。
+- **iPhone app 可以離線玩**：AI 直接在手機上算，沒有網路也能下；下到一半關掉 app，再開會接著下。
+- **三種語言**：第一次打開時跟隨手機語言，之後可以在設定裡切換。
+- **不用帳號、沒有廣告、不追蹤**：見[隱私權政策](PRIVACY.md)。
 
-正式網址為 `https://connect4.oraclelee.com`。正式主機需要 Podman 3.4+、
-systemd user service、Nginx 與有效的 TLS 憑證；開發機不需要安裝以下服務。
+### 架構
 
-### 發版與取得映像
+網站和 app 共用同一套 Vue 程式。app 用 Capacitor 打包，另外加上離線 AI、保存進度和系統分享。線上對戰由 FastAPI 伺服器判定每一步和勝負；AI 是開源的 connect-four-ai，伺服器上透過 PyO3 呼叫，app 裡則編譯成 WebAssembly 在手機上執行。開發、測試與部署的細節見 [docs/development.md](docs/development.md) 和 [docs/deploy.md](docs/deploy.md)。
 
-版本規則：小修改把最後一位 +1（3.0.0 → 3.0.1），大改把中間那位 +1（3.0.0 → 3.1.0）。
-不要手改版本號，在開發機任何一個 checkout 執行：
+### 授權
 
-```bash
-scripts/release.sh patch     # 或 minor；加 --dry-run 只做檢查
-```
+本專案**公開原始碼，但不是開源軟體**，採用 [PolyForm Noncommercial License 1.0.0](LICENSE)：
 
-腳本在一個暫時的 worktree 裡改 `pyproject.toml` 與 `frontend/package.json`、確認舊版本號
-沒有殘留在建置或部署檔案裡，開一個「Release X.Y.Z」的 pull request 並設定綠燈自動合併；
-合併後把 `vX.Y.Z` tag 打在合併出來的 main commit 上。CI 的 `backend` 與 `frontend` 兩個 job
-平行跑完整測試（含 e2e），都綠之後 `container` job 會確認 tag 與兩個 manifest 的版本一致，
-建立 GitHub Release，再把映像發布到
-`ghcr.io/edwardleeee/connect4-web:<tag>`（同時更新 `latest`）。GHCR 套件為
-Private，正式主機要先用一個只有 `read:packages` 權限的 GitHub personal access
-token（classic）登入一次：
+- **可以**：閱讀、學習、自己執行、修改，用於個人、教育、研究等非商業目的。
+- **未經同意不可以**：任何商業用途，例如販售、當成自己的 app 上架、放廣告營利，或用在公司的產品與服務。
 
-```bash
-podman login ghcr.io --username <GitHub 帳號> --authfile ~/.config/containers/auth.json
-```
+需要商業授權，請在本 repo 開 issue 聯絡。
 
-一定要指定 `--authfile`：不指定時 podman 把憑證存在
-`$XDG_RUNTIME_DIR/containers/auth.json`，那個目錄在 tmpfs，主機重開機就會被清掉，
-下次 `podman pull` 會失敗；存在 `~/.config/containers/auth.json` 才會保留。
-
-每個映像都帶 `org.opencontainers.image.revision` label（建置時的 commit SHA），
-部署前可以確認拉到的映像對應哪個 commit，不必猜 tag 是否被移動過：
-
-```bash
-podman image inspect --format '{{ index .Labels "org.opencontainers.image.revision" }}' ghcr.io/edwardleeee/connect4-web:v3.0.0
-```
-
-之後正式主機不必安裝 Rust 或 Node，直接拉映像部署：
-
-```bash
-deploy/deploy.sh v3.0.0
-```
-
-腳本會 `podman pull` 該 tag、把它標成 `localhost/connect4-web:production`、重啟
-服務並等待 `/api/health` 回 200；60 秒內不健康就自動切回上一版映像
-（`localhost/connect4-web:previous`）。回滾同一支腳本帶舊 tag 即可。
-
-沒有網路或要驗證未發布的變更時，仍可在主機上從原始碼建置：
-
-```bash
-git pull --ff-only origin main
-podman build --format docker --file Containerfile --tag localhost/connect4-web:production .
-```
-
-映像會分階段建置 Vue、Rust/PyO3 與 Python 套件；最終容器以非 root
-帳號執行單一 Uvicorn worker。不要在正式環境加入 `--reload` 或增加
-worker，因為房間與配對狀態目前存於單一程序記憶體。正式主機目前是 Podman 4.9.3；
-不論版本都要用 Docker image format（`--format docker`），才能保留映像內的
-`HEALTHCHECK`。
-
-### 安裝 rootless 背景服務
-
-```bash
-install -d -m 700 ~/.config/connect4 ~/.config/systemd/user
-install -m 600 deploy/connect4.env.example ~/.config/connect4/connect4.env
-install -m 644 deploy/connect4.service ~/.config/systemd/user/connect4.service
-sudo loginctl enable-linger "$(id -un)"
-systemctl --user daemon-reload
-systemctl --user enable --now connect4.service
-```
-
-`connect4.env` 的正式預設值為：
-
-```bash
-CONNECT4_COOKIE_SECURE=1
-CONNECT4_ALLOWED_ORIGINS=https://connect4.oraclelee.com
-CONNECT4_APP_ORIGINS=capacitor://localhost,https://localhost
-```
-
-`CONNECT4_APP_ORIGINS` 是手機 app 頁面的來源（iOS `capacitor://localhost`、Android
-`https://localhost`）。只有這些來源能跨網域讀取 `/api/session`，並用 session token 連線，詳見
-`docs/protocol.md` 的「App 連線」。沒設定時預設就是這兩個；設成空字串就關閉 app 模式。
-
-服務只發布到 `127.0.0.1:55555`，由 Nginx 對外提供 HTTPS 與 WebSocket。
-反向代理範例位於 `connect4.conf`；確認憑證路徑後安裝並重新載入：
-
-```bash
-sudo install -m 644 connect4.conf /etc/nginx/sites-available/connect4.conf
-sudo ln -s /etc/nginx/sites-available/connect4.conf /etc/nginx/sites-enabled/connect4.conf
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-若啟用連結已存在，保留現有連結即可。正式切換前依序檢查：
-
-```bash
-systemctl --user status connect4.service
-curl --fail http://127.0.0.1:55555/api/health
-curl --fail https://connect4.oraclelee.com/api/health
-journalctl --user-unit connect4.service --follow
-```
-
-只有原生精確求解器自測通過，`GET /api/health` 才回傳 HTTP 200；回應裡的 `version`
-是上線的應用程式版本，部署後用它確認換版成功（`deploy.sh` 結尾也會印出）。更新版本的順序是：
-開發機 `scripts/release.sh patch|minor` → 等 GitHub Actions 全綠 → 正式主機
-`deploy/deploy.sh vX.Y.Z`（或從原始碼重建相同 production tag 再
-`systemctl --user restart connect4.service`）。程序重啟會清除進行中的房間與配對。
+第三方元件依各自的授權使用，見 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。Connect 4 是 Hasbro 的商標；本專案是傳統四子棋遊戲的獨立實作，與 Hasbro 沒有任何關係，也未經其背書。
