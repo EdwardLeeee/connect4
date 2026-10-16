@@ -150,7 +150,7 @@ jobs:
                 | sed 's/^/- /'; } >> "${GITHUB_STEP_SUMMARY}" || true
           done
       - if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: ios-smoke-screenshots
           path: smoke-screenshots/
