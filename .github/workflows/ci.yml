@@ -89,7 +89,18 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
         working-directory: frontend
-      - run: npm audit --audit-level=high
+      # Fails on any high or critical advisory except GHSA-fc5q-39xc-vjpf (picomatch ReDoS,
+      # published 2026-10-19), which has no fixed release yet and reaches only build and
+      # test tools (vite, vitest, vue-tsc), never the built site. The user approved this
+      # exception on 2026-11-19; drop it once a fixed picomatch is out.
+      - run: |
+          npm audit --audit-level=high --json > "${RUNNER_TEMP}/npm-audit.json" || true
+          jq -e '.vulnerabilities' "${RUNNER_TEMP}/npm-audit.json" > /dev/null
+          found="$(jq -r '[.vulnerabilities[].via[] | objects
+            | select(.severity == "high" or .severity == "critical")
+            | select(.url | endswith("/GHSA-fc5q-39xc-vjpf") | not) | .url] | unique[]' \
+            "${RUNNER_TEMP}/npm-audit.json")"
+          if [ -n "${found}" ]; then echo "${found}"; npm audit --audit-level=high; exit 1; fi
         working-directory: frontend
       - run: npm run format:check
         working-directory: frontend
