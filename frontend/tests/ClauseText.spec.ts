@@ -32,11 +32,7 @@ describe("a sentence that breaks only between its phrases (3.3.0)", () => {
     const host = render(text, true);
     expect(
       [...host.querySelectorAll(".clauses > span")].map((s) => s.textContent),
-    ).toEqual([
-      "แตะเพื่อเริ่มเกมต่อไป",
-      "สีเหมือนเดิม",
-      "เกมนี้\u00A0มะลิ\u00A0เดินก่อน",
-    ]);
+    ).toEqual(["แตะเพื่อเริ่มเกมต่อไป", "สีเหมือนเดิม", "เกมนี้\u00A0มะลิ\u00A0เดินก่อน"]);
   });
 
   it("stays plain text in Chinese and English when Thai-only", async () => {

@@ -2629,9 +2629,7 @@ test("the Thai app offline lobby fits", async ({ page }, testInfo) => {
     "AI",
     "ได้ทุกเมื่อ!",
   ]);
-  await expect(page.locator(".needs-internet").first()).toHaveText(
-    "ต้องใช้เน็ต",
-  );
+  await expect(page.locator(".needs-internet").first()).toHaveText("ต้องใช้เน็ต");
   await expectThaiFits(page, testInfo, "app offline lobby");
 });
 
@@ -2651,9 +2649,7 @@ test("the Thai invite page fits, joinable or not", async ({
     },
   });
   await page.goto("/?room=LAN427");
-  await expect(page.locator(".invite-card h1")).toHaveText(
-    "เพื่อนชวนคุณมาเล่น",
-  );
+  await expect(page.locator(".invite-card h1")).toHaveText("เพื่อนชวนคุณมาเล่น");
   await expectThaiFits(page, testInfo, "invite");
   await page.getByRole("button", { name: "เข้าห้อง" }).click();
   await expect(page.locator(".invite-card.is-gone h1")).toHaveText(
